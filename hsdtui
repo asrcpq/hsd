@@ -40,10 +40,10 @@ main_loop() {
 		while read -r service; do
 			if [ "$ln" = "$hline" ]; then
 				echo -ne '\e[0;7m'
-				mylauncher hsd/hsd status $service | format_print
+				mylauncher hsd hsd status $service | format_print
 				echo -e '\e[0m'
 			else
-				mylauncher hsd/hsd status $service | format_print
+				mylauncher hsd hsd status $service | format_print
 				echo
 			fi
 			ln=$((ln + 1))
@@ -57,11 +57,11 @@ main_loop() {
 		elif [ "$c" = "k" ]; then
 			[ "$hline" -gt 0 ] && hline=$((hline - 1))
 		elif [ "$c" = "r" ]; then
-			mylauncher hsd/hsd start $current_service > /dev/null
+			mylauncher hsd hsd start $current_service > /dev/null
 		elif [ "$c" = "s" ]; then
-			mylauncher hsd/hsd stop $current_service > /dev/null
+			mylauncher hsd hsd stop $current_service > /dev/null
 		elif [ "$c" = "c" ]; then
-			mylauncher hsd/hsd clean $current_service
+			mylauncher hsd hsd clean $current_service
 		# TUI shouldn't use killtree
 		# it will kill TUI window, and will not clean
 		# elif [ "$c" = "K" ]; then
