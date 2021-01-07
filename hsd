@@ -1,0 +1,63 @@
+#!/bin/zsh
+
+_hsd_check_run() {
+	pidfile="$XDG_DATA_HOME/hsd/service/$1/pid"
+	exitfile="$XDG_DATA_HOME/hsd/service/$1/exit"
+	if [ -f "$pidfile" ]; then
+		pid="$(cat "$pidfile")"
+		if ! (ps -p $pid -o cmd= | grep -q "hsd-daemon"); then
+			exit 3
+		fi
+		echo $pid
+		return 0
+	fi
+	[ -f "$exitfile" ] && cat "$exitfile" && return 1
+	return 2
+}
+
+_hsd_status() {
+	if [ -z "$1" ]; then
+		for file in $(ls "$XDG_CONFIG_HOME/hsd/service/"); do
+			_hsd_status ${file%.sh}
+		done
+		exit
+	fi
+	result="$(_hsd_check_run $1)"
+	return_code=$?
+	if [ "$return_code" = 0 ]; then
+		echo "$1 r $result"
+	elif [ "$return_code" = 1 ]; then
+		echo "$1 q $result"
+	elif [ "$return_code" = 2 ]; then
+		echo "$1 n"
+	elif [ "$return_code" = 3 ]; then
+		echo "$1 D"
+	fi
+}
+
+_hsd_pidtree() {
+	for _pid in "$@"; do
+		echo $_pid
+		_hsd_pidtree `ps --ppid $_pid -o pid h`
+	done
+}
+
+_hsd_recursive_kill() {
+	pidlist="$(_hsd_pidtree $1)"
+	while read -r pid; do
+		echo "kill $pid"
+		kill $2 -- $pid
+	done <<<"$(echo $pidlist)"
+}
+
+_hsd_clean() {
+	rm "$XDG_DATA_HOME/hsd/service/$1/pid"
+}
+
+fifofile="$XDG_DATA_HOME/hsd/fifo"
+! [ -w $fifofile ] && exit 1
+if [[ $1 =~ ^(status|check_run|recursive_kill|clean)$ ]]; then
+	_hsd_$1 ${@:2}
+else
+	echo "$@" >> "$fifofile"
+fi
