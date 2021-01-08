@@ -19,7 +19,7 @@ clean_exit() {
 		if [ "$status" = "r" ]; then
 			_hsd_stop "$name"
 		fi
-	done <<<$(mylauncher hsd/hsd status)
+	done <<<$(mylauncher hsd hsd status)
 	rm -f "$XDG_DATA_HOME/hsd/pid"
 	rm -f "$fifofile"
 	exit 0
@@ -34,7 +34,7 @@ dprint() {
 _hsd_start_fork() {
 	set -m
 	trap : SIGTERM
-	mylauncher hsd/hsd check_run $1 && dprint "Already running" && exit 2
+	mylauncher hsd hsd check_run $1 && dprint "Already running" && exit 2
 	mkdir -p "$XDG_DATA_HOME/hsd/service/$1"
 	source "$XDG_CONFIG_HOME/hsd/service/$1.sh"
 	hsd_start &
@@ -50,7 +50,7 @@ _hsd_start() {
 }
 
 _hsd_stop() {
-	if ! pid="$(mylauncher hsd/hsd check_run $1)"; then
+	if ! pid="$(mylauncher hsd hsd check_run $1)"; then
 		dprint "Not running!"
 		return 1
 	fi
