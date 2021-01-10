@@ -13,7 +13,7 @@ mkdir -p "$XDG_DATA_HOME/hsd"
 error_path="$XDG_DATA_HOME/hsd/error.log"
 exec 2>>$error_path
 
-trap clean_exit EXIT
+trap clean_exit EXIT INT TERM
 clean_exit() {
 	while read -r pname stt rst; do
 		if [ "$status" = "r" ]; then
